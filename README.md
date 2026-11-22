@@ -1,12 +1,117 @@
-<img src="Pulso.ico" width="96" alt="Icono de Pulso">
+<img src="Pulso.ico" width="96" alt="Pulso icon">
 
 # Pulso
+
+> Formerly **xuca-monitor (Xuca Monitor)**: if you were searching for that name, this is the app.
+
+Free app for **Windows 10 and 11** that does **all-round monitoring of your PC** from the tray (next to the clock): **network and latency**, **USB**, **gaming performance**, **Windows errors** and the **state of your CPU, graphics card, memory and disks**. When the internet drops, the ping spikes, something disconnects, FPS fall, the screen goes black, there's a blue screen or the hardware overheats, it tells you **what happened and what to try**. It also ships a **performance overlay** on top of the game and a **session recorder** that measures a few minutes of real use and builds a report with the bottleneck and what to do about it. On Windows 7 SP1 and 8.1 it runs in a reduced form (see [below](#windows-7-8-and-81)).
+
+<!-- DEMO GIF: record it, save it as docs/demo.gif and delete the two comment markers on the next line -->
+<!-- ![Demo](docs/demo.gif) -->
+
+🇪🇸 [Versión en español más abajo](#-español) · Changelog: [English](CHANGELOG.en.md) · [Español](CHANGELOG.md)
+
+## Download
+
+**[Download Pulso.exe](https://github.com/011Xuca/pulso/releases/latest/download/Pulso.exe)**
+
+Nothing to install: open it and go. It uses the .NET that Windows already ships (if yours is missing it, the app tells you and takes you to the .NET Framework 4.8 download).
+
+> The first time, Windows may show a blue warning (SmartScreen) because the `.exe` isn't signed. Click **More info** and then **Run anyway**.
+
+> **It asks for administrator rights on launch.** That's needed to read the real sensors (temperatures, watts, disks). If you say no to that prompt, the app doesn't open.
+>
+> **With nothing installed besides Pulso** you get real data for: the graphics card (temperature, hot spot, memory, clocks, usage, VRAM, power and fans, using the NVIDIA or AMD driver DLLs you already have), NVMe disks (temperature, life left, data written and hours, read straight from the disk), the SMART status of hard drives (Healthy / Caution / Bad, with reallocated, pending and uncorrectable sectors and CRC errors; an HDD has no life % and none is made up), the processor (usage, real frequency and performance % according to Windows, package and per-core **power** if Windows exposes the `Energy Meter` counter, and a **hint** of throttling if under high load Windows limits it or the frequency drops), RAM, paging and battery (% and watts on laptops). What can't be read without a driver is stated plainly: **"CPU temperature: requires driver (PawnIO, optional)"**, and the same for voltage (and power, on machines without that counter).
+>
+> **CPU temperature:** without drivers, Pulso uses the thermal zone Windows provides when it's credible (on laptops it usually works; on many desktops Windows gives no real value and nothing is shown). For the **real** CPU temperature and watts and the motherboard fans there is **PawnIO**, a free, signed, open-source driver (the same one LibreHardwareMonitor and FanControl use). It is **optional** and **Pulso doesn't download or install it**: the **How to install PawnIO** button on the CPU tab opens [pawnio.eu](https://pawnio.eu/) or copies the command `winget install --id namazso.PawnIO -e`. It's normal for the antivirus or SmartScreen to warn when installing a driver like this. Once it finishes installing, Pulso detects it on its own.
+>
+> **Antivirus:** up to 1.0.3 two things made Defender complain: the "Install PawnIO" button downloaded the driver installer and ran it from Pulso, and Pulso recreated its "Start with Windows" task (with `schtasks.exe` and a temporary XML) **every time it opened** (alerts `Behavior:Win32/Persistence.A!ml` and `Execution.A!ml`). Since 1.0.4 Pulso neither downloads nor runs any installer, and the task is handled through the Task Scheduler API and only touched when you turn it on or when you've moved the `.exe`. If Defender had already removed it, restore it from Windows Security > Virus & threat protection > Protection history.
+
+## What it does
+
+| Tab | What it's for |
+|---|---|
+| **Network** | At the top it shows **live latency**: ping to the internet, 10-second average, jitter, packet loss and ping to the router. It warns when the **internet drops** and tells you whether it was the network card (cable or WiFi), the router or your provider, and when the **ping rises and stays high (lag)**: how much the PC is downloading or uploading, which programs tend to use a lot of internet and whether a driver is leaking memory. |
+| **USB** | When Windows plays the "something disconnected" sound, it tells you **which device it was** (mouse, keyboard, headset, monitor, Bluetooth...), whether it reconnected on its own and what to try. |
+| **Performance** | While you play in fullscreen, it watches CPU, RAM, disk and graphics card. When something **lowers your FPS** it names the culprit: a background program (Windows Update, the antivirus, a launcher downloading...), a CPU throttling from heat, full RAM or a disk at 100%. It also warns if **another program steals focus from the game** without you touching anything (Discord, Steam, a Windows notification...). With the CPU tab on, it knows whether the processor throttles because of heat or power. |
+| **Errors** | It warns you when the **screen goes black** because the video driver crashed, when there's a **blue screen** (with the code explained), when the PC **shuts off suddenly**, when there are hardware, disk or out-of-memory errors, and when a **game or program closes on its own** (and what failed: NVIDIA/AMD driver, an overlay...). With the hardware tabs on, it also tells you **how the PC was right before** and whether heat was the cause. |
+| **CPU** | Temperature (against its TjMax limit), total and per-core usage, speed, **real** power and voltage, a chart of the last 5 minutes, and below it the **motherboard, BIOS, power plan, battery and fans**. It warns if the processor hits its limit and throttles (heat or power throttling), if its fan stops, if your Intel 13th/14th gen needs a new BIOS and if you game on the power-saver plan or on battery. |
+| **GPU** | Core temperature, hot spot and memory, usage, clocks, power, fans, **VRAM** used and driver. It warns if it overheats, if the hot spot is far above the core (thermal paste), if the fans stop, if VRAM fills up or if the 12VHPWR connector is overloaded. On integrated graphics (Radeon Vega, Intel UHD) it shows shared memory and only the data that graphics chip reports. |
+| **Memory** | RAM used, modules (brand, model, current and rated speed), whether **XMP/EXPO** is on, whether it runs in **single or dual channel**, and **paging** (pages per second read from disk and page file usage). It warns if RAM fills up (and what fills it) or if the modules overheat. |
+| **Disks** | Each disk with its **type and bus (NVMe, SATA SSD, HDD, USB)**, its **SMART health** according to Windows and live **read and write speed**; and with sensors, temperature, life left, space used, data written and power-on hours. It warns if a disk throttles from heat, has little life left or Windows flags it as failing. |
+| **Session** | **Session recorder**: pick 1, 5, 10, 15 or 30 minutes and use the PC or play normally (it isn't a synthetic benchmark). At the end it leaves a report with **average FPS, 1% and 0.1% lows, frametimes**, stutters, temperatures and CPU and GPU usage, **VRAM, RAM and paging**; the **bottleneck** (CPU vs GPU, VRAM, available RAM, disk type and resolution); a **system diagnosis** (full or trimmed-down Windows edition, recent critical errors with `sfc /scannow` and `DISM`, processes, services and autostart, days without a reboot, Windows 11 with 8 GB or less, memory reserved by integrated graphics, single channel and XMP, paging on an HDD) and **when it's worth using [Brío](https://github.com/011Xuca/brio)**, with a button to open or download it. |
+| **Performance overlay** | On top of the game: FPS, session average, minimum and maximum, 1% and 0.1% lows, frametime with a chart, and usage, temperature, speed and power draw of CPU and GPU, VRAM and RAM. It's built from a text template and ships ready-made presets (including one for comparison videos). It injects nothing into the game: FPS come from Windows events (DirectX 9 to 12), like PresentMon. OBS captures it as the "Pulso Overlay" window. In its settings, **Categories to show** turns each part on or off without touching the template: FPS and 1% / 0.1% lows, Frametime and chart, CPU, GPU, VRAM, RAM, Temperatures, CPU and GPU names, and Time and game (remembered in `overlay.txt`). |
+
+- Each tab can be **turned on or off** with the **Enabled** checkbox (or right-click on the tray icon). When off it costs nothing.
+- It shows the network options from [Brío](https://github.com/011Xuca/brio) that you have applied, so you know whether any of them is related.
+- It reads the Windows errors from that moment and shows them next to the alert.
+- **It updates itself:** each time you open it, it checks GitHub once for a new version. If there is one, a yellow banner appears (and an entry in the tray menu); click it, it downloads from GitHub and reopens. Before replacing itself it checks that the download is complete, and if the new version fails to open it goes back to the previous one on its own.
+
+## How to use it
+
+1. Open `Pulso.exe`. It stays in the tray, next to the clock.
+2. Tick **Start with Windows** so it launches on its own (it starts hidden in the tray).
+3. Use your PC normally. When something happens, open the app from the tray and you'll see what it was.
+
+- Minimizing or closing with the X leaves it in the tray. To close it completely: right-click the icon > **Exit**.
+- The window never opens by itself: alerts are saved and you read them whenever you want.
+- **Theme** light, dark or system, and **language** Spanish or English (the first time it uses Windows' language).
+- **Zoom:** Ctrl + mouse wheel (or Ctrl + / Ctrl -) makes the text bigger or smaller. Ctrl + 0 resets it.
+
+## Where it stores things
+
+Everything lives in **Documents\Pulso**:
+
+- `registro_*.txt` (network, usb, performance, errors, session, and `registro_pc_*` for CPU, GPU, Memory and Disks; `registro_pc.txt` gathers all the hardware): everything each tab detected, with timestamps (**Open log** button).
+- `historial_*.txt`: what you see in the window (the last 300 alerts of each tab). **Clear** deletes it.
+- `pc_ultimos_minutos.txt`: how the PC was in the last 5 minutes (useful to know whether a blackout was caused by temperature).
+- `ajustes_monitores.txt`: theme, language, zoom and which tabs are on.
+- `overlay.txt`: the performance overlay settings.
+- `benchmarks\`: one `.txt` per recorded session (the same report you see in Session) and `benchmarks.csv`, with one row per session (`;`-separated) to compare them or open them in a spreadsheet.
+- `crash.txt`: only if the app hit an error.
+
+It sends nothing to any server. The only things that go out to the internet are the Network tab's ping (to the router, to 1.1.1.1 and to 8.8.8.8), the version check against GitHub and Pulso's update when you ask for it.
+
+## Windows 7, 8 and 8.1
+
+Pulso is built for **Windows 10 and 11**. On **Windows 7 SP1 and 8.1 it runs in a reduced form**:
+
+- **Work:** Network, USB, Errors and Performance (the latter without graphics card and CPU speed data).
+- **Missing:** the **CPU, GPU, Memory and Disks** tabs (temperatures, power draw, clocks and hardware state: the PawnIO driver is for Windows 10 and 11; a **Hardware** tab explaining this takes their place), the **performance overlay** and **session recording** (they use Windows 10 and 11 events). The app says so on those tabs and on the overlay button.
+- **.NET Framework 4.8** is required: those Windows versions don't ship it, and if it's missing the app takes you to the download.
+- **Windows 8 (not 8.1) isn't supported**: it can't install the .NET that's needed. The upgrade to 8.1 is free.
+
+## Build it yourself
+
+The code is in `src` (C# 5 for .NET Framework 4.8). Open `compilar.bat` and it builds `Pulso.exe` with the compiler Windows already ships. Nothing to install. The DLLs in the `lib` folder (sensors) are embedded **inside** the `.exe`: the result is a single file that works from any folder.
+
+### Publish a release
+
+1. Change `Version` in `src/App.cs` (and the one in `app.manifest`) and push the change.
+2. Create a Release with the tag `v` + version (for example `v1.0.4`). The `.github/workflows/publicar.yml` workflow builds `Pulso.exe` and uploads it to the Release (the app looks for that file to update itself), builds `Pulso.msix` for the Microsoft Store and the winget manifests (`winget-manifests` artifact).
+3. **winget:** the first time, submit the manifests by hand with `wingetcreate submit <winget-manifests folder>`. After that, with the `WINGET_TOKEN` secret, every Release is submitted automatically.
+4. **Microsoft Store:** the first time, create the app in Partner Center (name "Pulso"), set the repo variables `MSIX_PUBLISHER` (the `CN=...` Partner Center shows) and `STORE_PRODUCT_ID`, and in the secrets the Entra ID app's data (`PARTNER_CENTER_TENANT_ID`, `PARTNER_CENTER_SELLER_ID`, `PARTNER_CENTER_CLIENT_ID`, `PARTNER_CENTER_CLIENT_SECRET`). The Store signs the package; when installed from there, Pulso doesn't update itself (the Store does).
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Issues and pull requests are welcome, in English or Spanish. [MIT license](LICENSE).
+
+## Credits
+
+Made by **011Xuca**. Links: https://linktr.ee/011xuca
+If it helped you, you can support me on Ko-fi: https://ko-fi.com/011xuca
+
+Hardware temperatures and sensors use [LibreHardwareMonitorLib](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) (MPL-2.0 license).
+
+---
+
+## 🇪🇸 Español
 
 > Antes se llamaba **xuca-monitor (Xuca Monitor)**: si lo buscabas con ese nombre, es esta app.
 
 App gratis para **Windows 10 y 11** que hace el **monitoreo integral de tu PC** desde la bandeja (al lado del reloj): **red y latencia**, **USB**, **rendimiento en juegos**, **errores de Windows** y el **estado del procesador, la placa de video, la memoria y los discos**. Cuando se corta internet, sube el ping, se desconecta algo, bajan los FPS, la pantalla se pone negra, hay un pantallazo azul o el hardware se calienta de más, te dice **qué fue y qué probar**. Además trae un **overlay de rendimiento** encima del juego y un **grabador de sesión** que mide unos minutos de uso real y te arma un reporte con el cuello de botella y qué conviene hacer. En Windows 7 SP1 y 8.1 anda recortada (ver [más abajo](#windows-7-8-y-81)).
 
-## Descargar
+### Descargar
 
 **[Descargar Pulso.exe](https://github.com/011Xuca/pulso/releases/latest/download/Pulso.exe)**
 
@@ -22,7 +127,7 @@ No hace falta instalar nada: lo abrís y listo. Usa el .NET que ya trae Windows 
 >
 > **Antivirus:** hasta la 1.0.3 había dos cosas que hacían saltar a Defender: el botón "Instalar PawnIO" bajaba el instalador del driver y lo ejecutaba desde Pulso, y Pulso volvía a crear su tarea de "Iniciar con Windows" (con `schtasks.exe` y un XML temporal) **cada vez que se abría** (alertas `Behavior:Win32/Persistence.A!ml` y `Execution.A!ml`). Desde la 1.0.4 Pulso no descarga ni ejecuta ningún instalador, y la tarea se maneja con la API del Programador de tareas y solo se toca cuando la prendés o cuando moviste el `.exe`. Si Defender ya la había borrado, restaurala desde Seguridad de Windows > Protección contra virus y amenazas > Historial de protección.
 
-## Qué hace
+### Qué hace
 
 | Pestaña | Para qué sirve |
 |---|---|
@@ -42,7 +147,7 @@ No hace falta instalar nada: lo abrís y listo. Usa el .NET que ya trae Windows 
 - Lee los errores de Windows de ese momento y te los muestra junto al aviso.
 - **Se actualiza sola:** cada vez que la abrís se fija una vez en GitHub si hay una versión nueva. Si hay, aparece un cartel amarillo (y una opción en el menú de la bandeja); lo tocás, se baja de GitHub y se vuelve a abrir. Antes de reemplazarse verifica que la descarga esté completa, y si la versión nueva no llega a abrir vuelve sola a la anterior.
 
-## Cómo se usa
+### Cómo se usa
 
 1. Abrí `Pulso.exe`. Queda en la bandeja, al lado del reloj.
 2. Marcá **Iniciar con Windows** para que arranque solo (arranca escondido en la bandeja).
@@ -53,7 +158,7 @@ No hace falta instalar nada: lo abrís y listo. Usa el .NET que ya trae Windows 
 - **Tema** claro, oscuro o el del sistema, e **idioma** español o inglés (la primera vez usa el de Windows).
 - **Zoom:** Ctrl + rueda del mouse (o Ctrl + / Ctrl -) agranda o achica el texto. Ctrl + 0 lo vuelve al tamaño normal.
 
-## Dónde guarda las cosas
+### Dónde guarda las cosas
 
 Todo queda en **Documentos\Pulso**:
 
@@ -67,7 +172,7 @@ Todo queda en **Documentos\Pulso**:
 
 No manda nada a ningún servidor. Lo único que sale a internet es el ping de la pestaña Red (al router, a 1.1.1.1 y a 8.8.8.8), la consulta de versión a GitHub y la actualización de Pulso cuando la pedís.
 
-## Windows 7, 8 y 8.1
+### Windows 7, 8 y 8.1
 
 Pulso está hecha para **Windows 10 y 11**. En **Windows 7 SP1 y 8.1 anda recortada**:
 
@@ -76,7 +181,7 @@ Pulso está hecha para **Windows 10 y 11**. En **Windows 7 SP1 y 8.1 anda recort
 - Hace falta **.NET Framework 4.8**: esos Windows no lo traen, y si falta la app te lleva a la descarga.
 - **Windows 8 (sin el .1) no es compatible**: no puede instalar el .NET que hace falta. La actualización a 8.1 es gratis.
 
-## Compilarlo vos
+### Compilarlo vos
 
 El código está en `src` (C# 5 para .NET Framework 4.8). Abrí `compilar.bat` y te arma `Pulso.exe` con el compilador que ya trae Windows. No hace falta instalar nada. Las dll de la carpeta `lib` (sensores) se meten **adentro** del `.exe`: el resultado es un solo archivo que anda en cualquier carpeta.
 
@@ -87,7 +192,11 @@ El código está en `src` (C# 5 para .NET Framework 4.8). Abrí `compilar.bat` y
 3. **winget:** la primera vez enviá los manifiestos a mano con `wingetcreate submit <carpeta winget-manifests>`. Después, con el secreto `WINGET_TOKEN`, cada Release se envía solo.
 4. **Microsoft Store:** la primera vez creá la app en Partner Center (nombre "Pulso"), cargá en las variables del repo `MSIX_PUBLISHER` (el `CN=...` que muestra Partner Center) y `STORE_PRODUCT_ID`, y en los secretos los datos de la app de Entra ID (`PARTNER_CENTER_TENANT_ID`, `PARTNER_CENTER_SELLER_ID`, `PARTNER_CENTER_CLIENT_ID`, `PARTNER_CENTER_CLIENT_SECRET`). La Store firma el paquete; instalada desde ahí, Pulso no se actualiza sola (lo hace la Store).
 
-## Créditos
+### Colaborar
+
+Mirá [CONTRIBUTING.md](CONTRIBUTING.md). Se aceptan issues y pull requests, en español o en inglés. [Licencia MIT](LICENSE).
+
+### Créditos
 
 Hecho por **011Xuca**. Redes: https://linktr.ee/011xuca
 Si te sirvió, podés apoyarme en Ko-fi: https://ko-fi.com/011xuca

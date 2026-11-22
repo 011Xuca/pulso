@@ -33,7 +33,7 @@ namespace Xuca
         public bool Activo;
         public DateTime Desde = DateTime.Now;
 
-        public static string Idioma = "es";
+        public static string Idioma = "en";
         public static string T(string es, string en) { return Idioma == "en" ? en : es; }
         public static string Fecha(DateTime d) { return d.ToString(Idioma == "en" ? "MM/dd HH:mm:ss" : "dd/MM HH:mm:ss"); }
 

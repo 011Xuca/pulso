@@ -8,3 +8,10 @@ desktop.ini
 
 # Configuracion de Claude Code
 .claude/
+
+# Secretos: nunca al repo
+.env
+.env.*
+*token*.txt
+*.pem
+*.key
