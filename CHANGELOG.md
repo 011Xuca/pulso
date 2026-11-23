@@ -1,105 +1,104 @@
-# Cambios
+# Changelog
 
-Todo lo que cambió en cada versión de **Pulso**. La más nueva va arriba.
+Everything that changed in each version of **Pulso**. The newest is on top. (Spanish version: [CHANGELOG.md](CHANGELOG.md).)
 
 ## v1.0.4
 
-### Nuevo
-- **Grabación de sesión** (pestaña nueva **Sesión**): elegís 1, 5, 10, 15 o 30 minutos y usás la PC o jugás normal; no es un benchmark sintético. Al terminar deja un reporte (se guarda en `Documentos\Pulso\benchmarks`, con una fila en `benchmarks.csv`, y se compara con la sesión anterior de la misma app) con FPS promedio, 1 % y 0.1 % low, frametimes, tirones, temperaturas y uso de CPU y GPU, VRAM, RAM y paginación, y:
-  - **Cuello de botella**: cruza la carga del procesador contra la de la placa de video, la VRAM, la RAM disponible, el tipo de disco y la resolución activa.
-  - **Diagnóstico del sistema**: edición de Windows (completa o recortada), errores críticos recientes del visor de eventos (con `sfc /scannow` y `DISM` para reparar), procesos, servicios y programas de inicio de más (OneDrive, Widgets, telemetría), días sin reiniciar, Windows 11 completo con 8 GB o menos, memoria que se reserva la gráfica integrada (bajarla a 512 MB en la BIOS, distinto si es notebook o PC de escritorio), single channel y XMP, y paginación sobre un HDD.
-  - **Cómo seguir**: cuándo conviene usar **Brío** según lo que encontró (o te felicita si vas estable y con margen), con un botón para abrirlo o descargarlo.
-- **Red**: latencia en vivo arriba de la pestaña: ping a internet, promedio de 10 s, variación (jitter), paquetes perdidos y ping al router.
-- **Discos**: tipo y bus de cada disco (NVMe, SSD SATA, HDD, USB), salud SMART según Windows y velocidad de lectura y escritura en vivo. Avisa si Windows marca un disco con fallas.
-- **Memoria**: paginación en vivo (páginas por segundo leídas del disco y uso del archivo de paginación).
-- Preparado para la **Microsoft Store** (MSIX) y **winget**, con un workflow de GitHub Actions que publica cada versión.
-- La app se renombró de Xuca Monitor a **Pulso** (`Pulso.exe`, repo `github.com/011Xuca/pulso`); los datos y el "Iniciar con Windows" se mudan solos la primera vez que abre.
-- **Busca actualizaciones al abrir**: una sola vez por cada arranque, sin chequeos en segundo plano. Si hay una versión nueva aparece el cartel amarillo para actualizar.
-- **Más datos reales sin instalar nada** (sin PawnIO; nuevo `src/SinDriver.cs`):
-  - **Discos NVMe**: temperatura, temperatura de aviso y crítica, vida útil, datos escritos y horas encendido se le piden **directo al disco** (`IOCTL_STORAGE_QUERY_PROPERTY`: registro SMART/Health del NVMe, Identify del controlador y la temperatura que expone Windows). No usa driver propio ni necesita administrador. Solo se usa si la librería de sensores no dio la temperatura de ese disco. Los SATA siguen saliendo de la librería (SMART por comandos ATA, con administrador).
-  - **Procesador**: la frecuencia real (base × **% de rendimiento** de Windows, lo mismo que el Administrador de tareas) y el **% de límite de rendimiento** que impone el firmware, de los contadores `Processor Information`. El overlay ya no depende de que la pestaña CPU esté prendida para mostrar la velocidad, y sigue mostrando lo que da Windows aunque la librería de sensores no cargue.
-  - **Indicio de throttling sin temperatura**: si con carga alta Windows informa un límite de rendimiento o la frecuencia cae más de un 15 %, la pestaña CPU avisa (**CPU: indicio de que se está frenando**) y el reporte de Sesión lo cuenta, aclarando que es un indicio y no una temperatura.
-  - **Potencia del procesador sin driver**: si Windows expone el contador `Energy Meter` (RAPL del procesador, por ejemplo en Ryzen 9000), la pestaña CPU, el overlay y el reporte de Sesión muestran los vatios del paquete ("Potencia (Windows, RAPL)"), y "Ver todos" los de cada núcleo. Si el equipo no tiene ese contador, sigue diciendo "requiere driver".
-  - **Discos rígidos (HDD) y SATA sin % de vida**: en "Vida útil" muestran un estado calculado con atributos SMART reales (WMI `MSStorageDriver_ATAPISmartData` y `MSStorageDriver_FailurePredictStatus`, con administrador): **Sano (HDD)**, **Atención** (algún sector reasignado o pendiente, reintentos de arranque o errores CRC) o **Mal** (Windows predice falla, sectores incorregibles, 100+ reasignados o 10+ pendientes). No se inventa un porcentaje. Debajo de la tabla se explica el estado y se listan los contadores de cada disco. "Escrito" sale del atributo 241 si el HDD lo informa (si no, "—", y la leyenda dice por qué); la temperatura SMART (194/190) se usa si la librería no la dio.
-  - **Batería** (notebooks): cuánto consume o con cuánto carga, en vatios (`CallNtPowerInformation`).
-  - Placa de video: temperatura, hot spot, memoria, frecuencias, uso, VRAM, potencia y ventiladores ya salían sin PawnIO (la librería usa las DLL del driver de NVIDIA o AMD que ya está instalado).
-  - **Gráficos integrados** (Radeon Vega / Radeon Graphics de los Ryzen y Athlon, Intel UHD / Iris): la tarjeta de GPU muestra solo lo que la gráfica informa (uso, frecuencia y, si existen, potencia y voltaje) y la **memoria compartida** con la RAM, en vez de dejar casilleros vacíos; avisa que no tiene VRAM propia, ventilador ni hot spot, y la pastilla dice "Integrada" en lugar de "Sin dato". El aviso "tiene más de un año, conviene actualizarlo" del driver ya no sale en integradas (varias dejaron de recibir drivers nuevos y Windows no dice si existe uno) y la regla "VRAM llena" tampoco. El overlay suma `{gpu.vramshared}`.
-- **Novedades** dentro de la app: el botón **Novedades** (arriba, junto a Overlay de rendimiento) abre una ventana con las novedades de la última versión en el idioma de Pulso (español o inglés), sin internet: si son muy largas (más de 2000 caracteres) se corta en el límite de una viñeta, y un botón lleva al resto y al historial completo en GitHub. El historial en inglés está en `CHANGELOG.en.md`; los dos archivos van embebidos en el `.exe`.
+### New
+- **Session recording** (new **Session** tab): pick 1, 5, 10, 15 or 30 minutes and use the PC or play as usual; it is not a synthetic benchmark. When it ends it leaves a report (saved in `Documents\Pulso\benchmarks`, with a row in `benchmarks.csv`, and compared with the previous session of the same app) with average FPS, 1% and 0.1% low, frametimes, stutters, temperatures and CPU and GPU load, VRAM, RAM and paging, and:
+  - **Bottleneck**: crosses CPU load against GPU load, VRAM, available RAM, the disk type and the active resolution.
+  - **System diagnosis**: Windows edition (full or stripped down), recent critical errors from the event viewer (with `sfc /scannow` and `DISM` to repair), extra processes, services and startup programs (OneDrive, Widgets, telemetry), days without a reboot, full Windows 11 with 8 GB or less, memory reserved by integrated graphics (lower it to 512 MB in the BIOS, different for laptops and desktops), single channel and XMP, and paging on an HDD.
+  - **What next**: when **Brío** is worth using depending on what it found (or a congratulation if you are stable with headroom), with a button to open or download it.
+- **Network**: live latency at the top of the tab: ping to the internet, 10 s average, variation (jitter), lost packets and ping to the router.
+- **Disks**: type and bus of each disk (NVMe, SATA SSD, HDD, USB), SMART health according to Windows and live read and write speed. It warns if Windows flags a failing disk.
+- **Memory**: live paging (pages per second read from disk and paging file usage).
+- Ready for the **Microsoft Store** (MSIX) and **winget**, with a GitHub Actions workflow that publishes each version.
+- **Checks for updates on startup**: once per launch, with no background checks. If there is a new version, the yellow update banner appears.
+- **More real data without installing anything** (without PawnIO; new `src/SinDriver.cs`):
+  - **NVMe disks**: temperature, warning and critical temperature, lifetime, data written and power-on hours are requested **straight from the disk** (`IOCTL_STORAGE_QUERY_PROPERTY`: the NVMe SMART/Health log, the controller Identify and the temperature Windows exposes). It uses no driver of its own and needs no administrator. It is only used if the sensor library did not give that disk's temperature. SATA disks still come from the library (SMART through ATA commands, with administrator).
+  - **Processor**: the real frequency (base x Windows **performance %**, the same as Task Manager) and the **performance limit %** imposed by the firmware, from the `Processor Information` counters. The overlay no longer depends on the CPU tab being on to show the speed, and it keeps showing what Windows gives even if the sensor library does not load.
+  - **Throttling hint without temperature**: if under high load Windows reports a performance limit or the frequency drops by more than 15%, the CPU tab warns (**CPU: hint that it is being throttled**) and the Session report counts it, making clear that it is a hint and not a temperature.
+  - **CPU power without a driver**: if Windows exposes the `Energy Meter` counter (the processor's RAPL, for example on Ryzen 9000), the CPU tab, the overlay and the Session report show the package watts ("Power (Windows, RAPL)"), and "Show all" shows those of each core. If the PC has no such counter, it still says "requires driver".
+  - **Hard drives (HDD) and SATA without a life %**: under "Lifetime" they show a status computed from real SMART attributes (WMI `MSStorageDriver_ATAPISmartData` and `MSStorageDriver_FailurePredictStatus`, with administrator): **Healthy (HDD)**, **Warning** (some reallocated or pending sector, spin-up retries or CRC errors) or **Bad** (Windows predicts failure, uncorrectable sectors, 100+ reallocated or 10+ pending). No percentage is made up. Below the table the status is explained and each disk's counters are listed. "Written" comes from attribute 241 if the HDD reports it (otherwise "—", and the legend says why); the SMART temperature (194/190) is used if the library did not give it.
+  - **Battery** (laptops): how much it draws or charges with, in watts (`CallNtPowerInformation`).
+  - Graphics card: temperature, hot spot, memory, clocks, load, VRAM, power and fans already worked without PawnIO (the library uses the DLLs of the NVIDIA or AMD driver that is already installed).
+  - **Integrated graphics** (Radeon Vega / Radeon Graphics of Ryzen and Athlon, Intel UHD / Iris): the GPU card shows only what the graphics chip reports (load, clock and, if they exist, power and voltage) and the **shared memory** with the RAM, instead of leaving empty boxes; it explains that it has no VRAM of its own, fan or hot spot, and the pill says "Integrated" instead of "No data". The driver notice "over a year old, worth updating" no longer appears on integrated graphics (several stopped receiving new drivers and Windows does not say whether a newer one exists) and neither does the "VRAM full" rule. The overlay adds `{gpu.vramshared}`.
+- **What's new** inside the app: the **What's new** button (at the top, next to Performance overlay) opens a window with the latest version's changes in Pulso's language (Spanish or English), without internet: if they are very long (over 2000 characters) it is cut at a bullet boundary, and a button takes you to the rest and the full history on GitHub. The English history is in `CHANGELOG.en.md`; both files are embedded in the `.exe`.
 
-### Cambios
-- La pestaña **PC** se reparte en cuatro pestañas propias: **CPU** (con placa madre, BIOS, plan de energía, batería y ventiladores al pie), **GPU**, **Memoria** y **Discos**. Cada una tiene su casilla Activado, su contador y su registro; el historial de antes se conserva.
-- El botón "Overlay de FPS" pasa a llamarse **Overlay de rendimiento**.
-- **Overlay: Qué categorías mostrar**: casillas para prender o apagar cada parte sin tocar la plantilla (FPS y 1 % / 0.1 % low, Frametime y gráfico, CPU, GPU, VRAM, RAM, Temperaturas, Nombres de CPU y GPU, Hora y juego). Se recuerda entre usos en `overlay.txt`. Apagar Temperaturas saca solo los °C de cada línea.
-- Las pestañas pasan a una segunda línea si la ventana es angosta.
-- **Temperatura del procesador sin drivers**: si Windows da una zona térmica creíble (lo normal en notebooks), se muestra como "aproximada, sin driver". PawnIO queda como mejora opcional.
-- **PawnIO ya no se instala desde Pulso**: el botón pasa a ser **Cómo instalar PawnIO** (o **Cómo actualizar PawnIO**) y solo explica, abre [pawnio.eu](https://pawnio.eu/) o copia `winget install --id namazso.PawnIO -e`, avisando que el antivirus puede saltar y por qué. Cuando lo instalás, Pulso lo detecta solo en 2 minutos como mucho.
-- Pulso tiene **color propio: verde**. Cambian el ícono (borde y dibujo; el fondo sigue gris oscuro) y la ventana: pestaña elegida, botones, casillas y selección. Los gráficos y los colores de estado (verde, amarillo, rojo) de la pestaña PC no cambian.
-- Si la app actualizada encuentra otra copia del mismo `.exe` todavía abierta (otra sesión de Windows, o una versión anterior colgada), la cierra para poder reemplazar el archivo.
-- **Overlay de rendimiento**: ahora arranca **sin fondo** (opacidad del fondo en 0). Si ya lo tenías configurado, se mantiene lo tuyo.
-- **Actualización más segura**: antes de reemplazar el `.exe`, verifica que la descarga esté completa (mismo SHA-256 que publica GitHub) y que sea de verdad la versión anunciada. Si el `.exe` publicado dijera una versión menor, ya no se instala, porque si no la app volvería a ofrecer la misma actualización para siempre.
-- Si la versión recién bajada **no logra abrir**, vuelve sola a la anterior en vez de dejar la app rota. La versión anterior se borra recién cuando la nueva terminó de arrancar.
-- Se limpian los restos de una actualización cortada a la mitad (`.nuevo`, `.roto`).
-- **Temperaturas**: 80 °C ya no es "caliente". La temperatura del procesador y de la placa de video se pinta amarilla desde 85 °C (sin aviso) y roja, con aviso, desde 90 °C. En procesadores con un límite más bajo (Ryzen X3D: 89 °C), el rojo arranca 3 °C antes de ese límite. Los colores del overlay pasan a 85/90 °C (si tenías un modelo de fábrica sin tocar, se actualiza solo).
-- **Windows 7 SP1 y 8.1**: Pulso anda recortado. Funcionan Red, USB, Errores y Rendimiento (sin datos de la placa de video ni de velocidad del procesador). Las pestañas de hardware (CPU, GPU, Memoria y Discos), el overlay de rendimiento y la grabación de sesión son solo para Windows 10 y 11, y la app lo avisa en vez de fallar.
-- Si falta **.NET Framework 4.7.2 o más nuevo** (Windows 7 SP1 y 8.1 no lo traen de fábrica), avisa y ofrece abrir la descarga del 4.8, en vez de cerrarse con un error confuso. En Windows 8 (sin el .1), que no puede instalarlo, avisa que hace falta actualizar a 8.1.
+### Changes
+- The **PC** tab is split into four tabs of their own: **CPU** (with motherboard, BIOS, power plan, battery and fans at the bottom), **GPU**, **Memory** and **Disks**. Each one has its own Enabled checkbox, its counter and its log; the earlier history is kept.
+- The "FPS overlay" button is now called **Performance overlay**.
+- **Overlay: What categories to show**: checkboxes to turn each part on or off without touching the template (FPS and 1% / 0.1% low, Frametime and graph, CPU, GPU, VRAM, RAM, Temperatures, CPU and GPU names, Time and game). It is remembered between uses in `overlay.txt`. Turning Temperatures off removes only the °C from each line.
+- The tabs wrap to a second line if the window is narrow.
+- **CPU temperature without drivers**: if Windows gives a credible thermal zone (normal on laptops), it is shown as "approximate, no driver". PawnIO remains an optional improvement.
+- **PawnIO is no longer installed from Pulso**: the button becomes **How to install PawnIO** (or **How to update PawnIO**) and only explains, opens [pawnio.eu](https://pawnio.eu/) or copies `winget install --id namazso.PawnIO -e`, warning that the antivirus may complain and why. When you install it, Pulso detects it by itself within 2 minutes at most.
+- Pulso has its **own color: green**. The icon changes (border and drawing; the background stays dark gray) and so does the window: selected tab, buttons, checkboxes and selection. The charts and the status colors (green, yellow, red) of the PC tab do not change.
+- If the updated app finds another copy of the same `.exe` still open (another Windows session, or a hung older version), it closes it so the file can be replaced.
+- **Performance overlay**: it now starts **without a background** (background opacity at 0). If you already had it configured, yours is kept.
+- **Safer update**: before replacing the `.exe`, it checks that the download is complete (same SHA-256 that GitHub publishes) and that it really is the announced version. If the published `.exe` claimed a lower version, it is no longer installed, because otherwise the app would offer the same update forever.
+- If the newly downloaded version **fails to open**, it goes back to the previous one by itself instead of leaving the app broken. The previous version is only deleted once the new one has finished starting.
+- Leftovers from an update cut in half (`.nuevo`, `.roto`) are cleaned up.
+- **Temperatures**: 80 °C is no longer "hot". The CPU and graphics card temperature turns yellow from 85 °C (no warning) and red, with a warning, from 90 °C. On processors with a lower limit (Ryzen X3D: 89 °C), red starts 3 °C before that limit. The overlay colors move to 85/90 °C (if you had an untouched factory model, it updates by itself).
+- **Windows 7 SP1 and 8.1**: Pulso runs in a reduced form. Network, USB, Errors and Performance work (without graphics card or CPU speed data). The hardware tabs (CPU, GPU, Memory and Disks), the performance overlay and session recording are for Windows 10 and 11 only, and the app says so instead of failing.
+- If **.NET Framework 4.7.2 or newer** is missing (Windows 7 SP1 and 8.1 do not ship with it), it warns and offers to open the 4.8 download, instead of closing with a confusing error. On Windows 8 (not 8.1), which cannot install it, it warns that you need to update to 8.1.
 
-### Arreglos
-- **Sin PawnIO se mostraban números falsos del procesador**: potencia en 0 W, frecuencias en 0 MHz y voltaje fijo de 1.55 V (la librería crea esos sensores aunque no los pueda leer). Ahora la pestaña CPU dice **"Temperatura de CPU: requiere driver (PawnIO, opcional)"** y "requiere driver" en voltaje (y en potencia si Windows no la da), "Ver todos" muestra solo el uso, el overlay deja `--` (y marca con `~` la temperatura aproximada de la zona térmica), y el reporte de Sesión dice "temperatura / potencia: requiere driver" en vez de "- / -" y ya no dice "muy estable de temperaturas" si la del procesador no se midió.
-- **El antivirus saltaba al tocar "Instalar PawnIO"**: Pulso bajaba el instalador del driver desde GitHub y lo ejecutaba. Ya no descarga ni ejecuta ningún instalador.
-- **Defender borraba Pulso** (`Behavior:Win32/Persistence.A!ml` y `Execution.A!ml`): Pulso recreaba la tarea de "Iniciar con Windows" con `schtasks.exe` y un XML temporal en cada arranque. Ahora usa la API del Programador de tareas y solo la escribe cuando la prendés o cuando el `.exe` cambió de carpeta.
-- **"Requiere driver (PawnIO, opcional)" aunque PawnIO estuviera instalado**: si la librería de sensores abría antes de que el driver estuviera listo, leía ceros y la pestaña CPU quedaba sin temperatura, vatios ni voltaje (y mostraba la potencia de Windows como si fuera lo único). Ahora, si PawnIO 2.0 o más nuevo está instalado y Pulso tiene administrador pero el procesador sigue sin dar datos, **reabre los sensores solo** (a los 10, 20 y 40 segundos y después cada 2 minutos) y, mientras tanto, dice la verdad: "PawnIO instalado, pero no entregó datos del CPU (reintentando)" con qué probar (cerrar HWiNFO o FanControl, reiniciar la PC). Si Pulso no está corriendo como administrador, lo dice ("requiere administrador") en vez de culpar a PawnIO. El registro suma, una vez por apertura, si hay administrador, la versión de PawnIO, cuánto tardó en abrir, cuántos sensores dio el procesador y los valores de temperatura y vatios.
-- **Voltaje del procesador vacío en Ryzen 7000 y 9000**: esos procesadores no tienen un sensor de voltaje real, solo el VID de cada núcleo. Ahora la pestaña CPU muestra el mayor VID como **Voltaje (VID)**, aclarando que es lo que el procesador solicita y no lo medido en la placa; si hay un voltaje real se sigue mostrando como "Voltaje".
+### Fixes
+- **Without PawnIO, fake CPU numbers were shown**: power at 0 W, frequencies at 0 MHz and a fixed voltage of 1.55 V (the library creates those sensors even if it cannot read them). Now the CPU tab says **"CPU temperature: requires driver (PawnIO, optional)"** and "requires driver" for voltage (and for power if Windows does not give it), "Show all" lists only the load, the overlay leaves `--` (and marks the approximate thermal-zone temperature with `~`), and the Session report says "temperature / power: requires driver" instead of "- / -" and no longer says "very stable temperatures" if the CPU one was not measured.
+- **The antivirus triggered when pressing "Install PawnIO"**: Pulso downloaded the driver installer from GitHub and ran it. It no longer downloads or runs any installer.
+- **Defender deleted Pulso** (`Behavior:Win32/Persistence.A!ml` and `Execution.A!ml`): Pulso recreated the "Start with Windows" task with `schtasks.exe` and a temporary XML on every launch. Now it uses the Task Scheduler API and only writes it when you turn it on or when the `.exe` moved to another folder.
+- **"Requires driver (PawnIO, optional)" even though PawnIO was installed**: if the sensor library opened before the driver was ready, it read zeros and the CPU tab was left without temperature, watts or voltage (showing Windows' power as if it were the only data). Now, if PawnIO 2.0 or newer is installed and Pulso has administrator rights but the processor still gives no data, it **reopens the sensors by itself** (at 10, 20 and 40 seconds and then every 2 minutes) and, meanwhile, tells the truth: "PawnIO is installed but gave no CPU data (retrying)" with what to try (close HWiNFO or FanControl, restart the PC). If Pulso is not running as administrator, it says so ("requires administrator") instead of blaming PawnIO. The log now adds, once per opening, whether there is administrator access, the PawnIO version, how long opening took, how many sensors the processor gave and the temperature and watts values.
+- **CPU voltage empty on Ryzen 7000 and 9000**: those processors have no real voltage sensor, only each core's VID. The CPU tab now shows the highest VID as **Voltage (VID)**, making clear it is what the processor requests and not what is measured on the board; if a real voltage exists it is still shown as "Voltage".
 
 ## v1.0.3
 
-### Nuevo
-- Pestaña **PC**: temperatura, uso, velocidad y potencia **reales** del procesador y de la placa de video (núcleo, hot spot y memoria), uso y velocidad de la RAM, temperatura y vida útil de los discos, ventiladores, placa madre, BIOS, plan de energía y batería. Todo en verde, amarillo o rojo según qué tan comprometido está.
-- Adentro de "PC" hay 5 categorías: **General**, **CPU**, **GPU**, **RAM** y **Discos**. Cada una tiene su propio registro, su contador y su casilla "Guardar avisos". General junta todo.
-- Gráfico de los últimos 5 minutos, máximo de la sesión y máximo jugando, uso por núcleo y la lista completa de sensores.
-- **Avisos concretos**, con qué probar y cómo estaba la PC en ese momento:
-  - Procesador al límite de temperatura y **frenándose** (dice de cuántos GHz a cuántos bajó), o muy caliente mucho rato (con qué programa lo usaba).
-  - Placa de video caliente, **hot spot muy separado del núcleo** (pasta térmica gastada), memoria de video caliente, ventiladores parados, **VRAM llena** y **conector 12VHPWR sobrecargado**.
-  - **RAM llena** (con qué programas la llenan), **XMP/EXPO apagado** (compara con la velocidad de tus módulos) y **single channel**.
-  - Discos que se frenan por temperatura o con poca vida útil.
-  - Intel 13.ª/14.ª gen con BIOS vieja (el problema de degradación por voltaje).
-  - Jugando con el plan de energía en ahorro o la notebook a batería.
-- **Errores** ahora dice cómo estaba la PC justo antes de la pantalla negra, el pantallazo, el apagón o el juego cerrado, y si fue calor o no (por ejemplo: "la placa estaba a 70 °C: no fue por calor, mirá el driver o la fuente").
-- **Rendimiento**: cuando el procesador se frena, ahora dice si es temperatura o energía (antes solo podía adivinar).
-- Para la temperatura del procesador hace falta **PawnIO** (driver gratis y firmado, el mismo de LibreHardwareMonitor y FanControl): la pestaña PC tiene un botón para instalarlo y verifica su firma antes de abrirlo.
+### New
+- **PC** tab: **real** temperature, load, speed and power of the processor and the graphics card (core, hot spot and memory), RAM load and speed, disk temperature and lifetime, fans, motherboard, BIOS, power plan and battery. All in green, yellow or red depending on how stressed it is.
+- Inside "PC" there are 5 categories: **General**, **CPU**, **GPU**, **RAM** and **Disks**. Each one has its own log, its counter and its "Save warnings" checkbox. General gathers everything.
+- A chart of the last 5 minutes, the session maximum and the maximum while gaming, load per core and the full list of sensors.
+- **Specific warnings**, with what to try and how the PC was at that moment:
+  - Processor at its temperature limit and **throttling** (it says from how many GHz to how many it dropped), or very hot for a long time (with which program was using it).
+  - Hot graphics card, **hot spot far from the core** (worn thermal paste), hot video memory, stopped fans, **full VRAM** and **overloaded 12VHPWR connector**.
+  - **Full RAM** (with which programs fill it), **XMP/EXPO off** (compares with the speed of your modules) and **single channel**.
+  - Disks that throttle from temperature or have little lifetime left.
+  - Intel 13th/14th gen with an old BIOS (the voltage degradation problem).
+  - Gaming with the power plan on saver or the laptop on battery.
+- **Errors** now says how the PC was right before the black screen, the blue screen, the blackout or the closed game, and whether it was heat or not (for example: "the card was at 70 °C: it was not heat, look at the driver or the power supply").
+- **Performance**: when the processor throttles, it now says whether it is temperature or power (before it could only guess).
+- For the CPU temperature you need **PawnIO** (a free, signed driver, the same one LibreHardwareMonitor and FanControl use): the PC tab has a button to install it and it verifies its signature before opening it.
 
-- **Overlay de FPS** (botón "Overlay de FPS" arriba): muestra encima del juego FPS, 1 % low, frametime, gráfico de frametime, uso y temperatura de CPU y GPU, y RAM, como el de MSI Afterburner con RivaTuner. Elegís en qué procesos aparece, un atajo F1-F12 para ocultarlo y la esquina y posición. Los cambios se aplican al instante, tiene vista previa y podés exportar e importar el estilo.
-  - **100 % personalizable con una plantilla de texto**: cada línea que escribís es una línea del overlay. Usás variables entre llaves (`{gpu.name}`, `{fps}`, `{low1}`, `{ft}`, `{gpu.temp}`, `{gpu.vram}`, `{cpu.clock}`, `{ram.used}`...; hay una lista para insertar con un clic), con **color** (`<c=FF0000>`), **tamaño** (`<s=150>`), **negrita** (`<b>`), **formato** (`{gpu.power:0.0}`), **alerta por valor** (`{gpu.temp!75,85}`: naranja y rojo; `{fps!<60,30}` al revés para FPS) y **gráfico de frametime** con el tamaño que quieras (`{graph:260x40}`). Trae modelos listos, incluido uno estilo Afterburner.
-  - Fuente, tamaño, negrita, color base, y opacidad del texto y del fondo **por separado** (transparencia por pixel).
-  - **Seguro con anti-cheats**: no inyecta nada en el juego. Los FPS salen de los eventos de Windows (ETW, DXGI y D3D9), como PresentMon, y el texto va en una ventana transparente por la que pasan los clics. Se ve con el juego en pantalla completa sin bordes o en ventana, no en pantalla completa exclusiva.
-  - **Capturable con OBS**: es una ventana aparte, así que se agrega como fuente de **Captura de ventana**. Destildando "Ocultarlo cuando el juego no está al frente" se queda visible mientras el juego esté abierto, aunque estés mirando OBS.
-  - **Sin gasto cuando no jugás**: sin un juego de la lista abierto no hay sesión ETW ni lectura de sensores, solo un chequeo de procesos por segundo.
-  - **Reborde del texto**: negro por defecto y de 0 a 6 px, con color a elección, para que se lea sobre cualquier fondo.
-  - **Promedio de FPS** (`{fps.avg}`) y **0.1 % low** (`{low01}`), y la plantilla por defecto ahora trae colores, el nombre de la CPU y de la GPU y el promedio. Quien tenía la plantilla vieja sin tocar pasa a la nueva solo.
-  - Modelo nuevo **Comparativa (videos)**: nombres de los componentes, FPS grandes, promedio, 1 % y 0.1 % low, y consumo de GPU y CPU.
+- **FPS overlay** ("FPS overlay" button at the top): shows on top of the game FPS, 1% low, frametime, a frametime graph, CPU and GPU load and temperature, and RAM, like MSI Afterburner with RivaTuner. You choose which processes it appears in, an F1-F12 hotkey to hide it, and the corner and position. Changes apply instantly, it has a preview and you can export and import the style.
+  - **100% customizable with a text template**: each line you write is a line of the overlay. You use variables between braces (`{gpu.name}`, `{fps}`, `{low1}`, `{ft}`, `{gpu.temp}`, `{gpu.vram}`, `{cpu.clock}`, `{ram.used}`...; there is a list to insert with one click), with **color** (`<c=FF0000>`), **size** (`<s=150>`), **bold** (`<b>`), **format** (`{gpu.power:0.0}`), **alert by value** (`{gpu.temp!75,85}`: orange and red; `{fps!<60,30}` the other way round for FPS) and a **frametime graph** of any size (`{graph:260x40}`). It comes with ready-made models, including an Afterburner-style one.
+  - Font, size, bold, base color, and text and background opacity **separately** (per-pixel transparency).
+  - **Anti-cheat safe**: it injects nothing into the game. FPS comes from Windows events (ETW, DXGI and D3D9), like PresentMon, and the text goes in a transparent window that clicks pass through. It is visible with the game in borderless fullscreen or windowed, not in exclusive fullscreen.
+  - **Capturable with OBS**: it is a separate window, so it is added as a **Window Capture** source. Unchecking "Hide it when the game is not in front" keeps it visible while the game is open, even if you are looking at OBS.
+  - **No cost when you are not playing**: with no game from the list open there is no ETW session or sensor reading, only one process check per second.
+  - **Text outline**: black by default and 0 to 6 px, with a color of your choice, so it reads on any background.
+  - **FPS average** (`{fps.avg}`) and **0.1% low** (`{low01}`), and the default template now has colors, the CPU and GPU name and the average. Anyone with the untouched old template moves to the new one by themselves.
+  - New **Comparison (videos)** model: component names, large FPS, average, 1% and 0.1% low, and GPU and CPU power draw.
 
-### Cambios
-- Arreglado: el overlay mostraba **FPS de más** (por ejemplo 5000 jugando a 1000) porque los tiempos de los eventos de Windows tienen otro origen de reloj que el programa. Ahora FPS, 1 % low, frametime y gráfico se miden contra el último cuadro recibido. También se cuenta una sola swapchain, para no sumar de más si el juego o un overlay presentan en varias.
-- **Rendimiento**: se sacó el aviso "Placa de video al máximo". La GPU al 100 % jugando es lo normal (no hay cuello de botella) y el aviso parecía un problema sin serlo. Siguen los avisos de bajones reales: procesador, RAM, disco, tirones y pérdida de foco.
-- La app ahora **pide permisos de administrador** al abrir (los sensores lo necesitan).
-- "Iniciar con Windows" usa una tarea programada (los accesos directos no se elevan solos). Además arranca aunque la notebook esté a batería y no se cierra a las 72 horas (dos trampas de las tareas que arma Windows por defecto).
-- Si algo falla al abrir, en vez de cerrarse sin avisar muestra el error y lo guarda en crash.txt, en la carpeta de datos.
-- Arreglado: el Snipping Tool (recorte de pantalla) ya no se detecta como juego, lo que daba avisos falsos de "perdió el foco" en Rendimiento.
+### Changes
+- Fixed: the overlay showed **too many FPS** (for example 5000 while playing at 1000) because the timestamps of Windows events have a different clock origin from the program. Now FPS, 1% low, frametime and the graph are measured against the last frame received. Only one swapchain is also counted, so it does not add up extra if the game or an overlay presents on several.
+- **Performance**: the "Graphics card at maximum" warning was removed. GPU at 100% while gaming is normal (there is no bottleneck) and the warning looked like a problem without being one. The warnings about real drops remain: processor, RAM, disk, stutters and focus loss.
+- The app now **asks for administrator permissions** on opening (the sensors need it).
+- "Start with Windows" uses a scheduled task (shortcuts do not elevate by themselves). It also starts even if the laptop is on battery and does not stop after 72 hours (two traps of the tasks Windows builds by default).
+- If something fails on opening, instead of closing without a word it shows the error and saves it in crash.txt, in the data folder.
+- Fixed: the Snipping Tool is no longer detected as a game, which gave false "lost focus" warnings in Performance.
 
 ## v1.0.2
 
-### Nuevo
-- **Rendimiento** ahora avisa cuando **otro programa le saca el foco al juego** sin que toques nada (Discord, Steam, un aviso de Windows Update, un pedido de permiso...): qué programa fue, qué ventana abrió y cuánto tiempo quedó el juego atrás, con qué probar para que no pase más. Si eso pasó justo antes de un bajón de FPS, el aviso del bajón también lo dice.
-- No cuenta lo que hacés vos (Alt+Tab, la tecla Windows, el menú inicio o un clic en otra ventana).
+### New
+- **Performance** now warns when **another program takes focus from the game** without you touching anything (Discord, Steam, a Windows Update notice, a permission request...): which program it was, which window it opened and how long the game stayed behind, with what to try so it does not happen again. If that happened right before an FPS drop, the drop warning says so too.
+- It does not count what you do yourself (Alt+Tab, the Windows key, the start menu or a click on another window).
 
 ## v1.0.1
 
-### Nuevo
-- Pestaña **Rendimiento**: mientras jugás en pantalla completa, te dice qué hizo bajar los FPS. Puede ser un programa de fondo, el procesador frenado por temperatura, la RAM llena o el disco al 100 %. También avisa cuando la placa de video es el límite.
-- Pestaña **Errores**: pantalla negra por el driver de video, pantallazo azul con el código explicado, apagones de golpe, errores de hardware, del disco y de memoria, y juegos o programas que se cierran solos (con dónde fallaron).
-- **Aviso de versión nueva**: un cartel amarillo y una opción en la bandeja. Se actualiza sola desde GitHub.
-- **Zoom** del texto: Ctrl + rueda del mouse, o Ctrl + / Ctrl - (Ctrl + 0 lo vuelve al normal).
-- La versión aparece en el título de la ventana.
+### New
+- **Performance** tab: while you play in fullscreen, it tells you what made the FPS drop. It can be a background program, the processor throttled by temperature, full RAM or the disk at 100%. It also warns when the graphics card is the limit.
+- **Errors** tab: black screen from the video driver, blue screen with the code explained, sudden blackouts, hardware, disk and memory errors, and games or programs that close by themselves (with where they failed).
+- **New version notice**: a yellow banner and an option in the tray. It updates itself from GitHub.
+- Text **zoom**: Ctrl + mouse wheel, or Ctrl + / Ctrl - (Ctrl + 0 resets it).
+- The version appears in the window title.
 
 ## v1.0.0
 
-Primera versión: pestañas **Red** (cortes de internet y lag) y **USB** (qué se desconectó), en la bandeja, con tema claro/oscuro y español/inglés. Registros e historial en la carpeta Documentos.
+First version: **Network** tabs (internet drops and lag) and **USB** (what got disconnected), in the tray, with light/dark theme and Spanish/English. Logs and history in the Documents folder.

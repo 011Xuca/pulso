@@ -1,4 +1,4 @@
-// Pulso: visor de novedades. Muestra la ultima version del CHANGELOG (CHANGELOG.md en español y CHANGELOG.en.md en
+// Pulso: visor de novedades. Muestra la ultima version del CHANGELOG (CHANGELOG.es.md en español y CHANGELOG.md en
 // ingles, embebidos en el .exe por compilar.bat: anda sin internet) en el idioma de la app. Si la version pasa de
 // TopeCaracteres se corta en el ultimo limite de viñeta que entra (nunca a mitad de una) y avisa que el resto de la
 // version y el historial completo estan en GitHub (boton). Ventana propia, no modal: la app sigue andando.
@@ -77,7 +77,7 @@ namespace Xuca
                 ventana.Close();
             }
             idiomaAbierto = en;
-            string archivo = en == "en" ? "CHANGELOG.en.md" : "CHANGELOG.md";
+            string archivo = en == "en" ? "CHANGELOG.md" : "CHANGELOG.es.md";
             bool completa;
             List<string> u = Ultima(Leer("changelog." + en + ".md"), TopeCaracteres, out completa);
 

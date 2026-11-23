@@ -2,14 +2,12 @@
 
 # Pulso
 
-> Formerly **xuca-monitor (Xuca Monitor)**: if you were searching for that name, this is the app.
-
 Free app for **Windows 10 and 11** that does **all-round monitoring of your PC** from the tray (next to the clock): **network and latency**, **USB**, **gaming performance**, **Windows errors** and the **state of your CPU, graphics card, memory and disks**. When the internet drops, the ping spikes, something disconnects, FPS fall, the screen goes black, there's a blue screen or the hardware overheats, it tells you **what happened and what to try**. It also ships a **performance overlay** on top of the game and a **session recorder** that measures a few minutes of real use and builds a report with the bottleneck and what to do about it. On Windows 7 SP1 and 8.1 it runs in a reduced form (see [below](#windows-7-8-and-81)).
 
 <!-- DEMO GIF: record it, save it as docs/demo.gif and delete the two comment markers on the next line -->
 <!-- ![Demo](docs/demo.gif) -->
 
-🇪🇸 [Versión en español más abajo](#-español) · Changelog: [English](CHANGELOG.en.md) · [Español](CHANGELOG.md)
+🇪🇸 [Versión en español más abajo](#-español) · Changelog: [English](CHANGELOG.md) · [Español](CHANGELOG.es.md)
 
 ## Download
 
@@ -106,8 +104,6 @@ Hardware temperatures and sensors use [LibreHardwareMonitorLib](https://github.c
 ---
 
 ## 🇪🇸 Español
-
-> Antes se llamaba **xuca-monitor (Xuca Monitor)**: si lo buscabas con ese nombre, es esta app.
 
 App gratis para **Windows 10 y 11** que hace el **monitoreo integral de tu PC** desde la bandeja (al lado del reloj): **red y latencia**, **USB**, **rendimiento en juegos**, **errores de Windows** y el **estado del procesador, la placa de video, la memoria y los discos**. Cuando se corta internet, sube el ping, se desconecta algo, bajan los FPS, la pantalla se pone negra, hay un pantallazo azul o el hardware se calienta de más, te dice **qué fue y qué probar**. Además trae un **overlay de rendimiento** encima del juego y un **grabador de sesión** que mide unos minutos de uso real y te arma un reporte con el cuello de botella y qué conviene hacer. En Windows 7 SP1 y 8.1 anda recortada (ver [más abajo](#windows-7-8-y-81)).
 
