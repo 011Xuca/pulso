@@ -248,9 +248,6 @@ namespace Xuca
     public partial class Pulso : ApplicationContext
     {
         public const string Nombre = "Pulso";
-        // Lo unico que queda del nombre anterior (Xuca Monitor, hasta la 1.0.3): la carpeta de datos se muda sola a
-        // Documentos\Pulso y la tarea "Iniciar con Windows" se cambia por la nueva (ver CarpetaDatos y Iniciar).
-        const string NombreViejo = "Xuca Monitor";
         // Al sacar una version nueva: cambiar esto y subir Pulso.exe a un Release de GitHub con el tag "v" + Version
         public const string Version = "1.0.4";
 
@@ -330,7 +327,7 @@ namespace Xuca
             Dir = Path.GetDirectoryName(Exe);
             // Registros, historial y ajustes van a Documentos\Pulso (asi el .exe puede estar en cualquier lado).
             // Se muda despues de tomar el mutex: ninguna otra copia puede estar escribiendo ahi.
-            Datos = carpetaDatos = CarpetaDatos(true);
+            Datos = carpetaDatos = CarpetaDatos();
             try { Directory.CreateDirectory(Datos); } catch { Datos = Dir; }
             CfgF = Path.Combine(Datos, "ajustes_monitores.txt");
 
@@ -420,16 +417,10 @@ namespace Xuca
             timerTema.Interval = 5000;
             timerTema.Tick += delegate { if (fv != null && tema == "sistema" && EsOscuro() != oscuroAhora) AplicarTema(); };
 
-            // "Iniciar con Windows": la tarea de antes del cambio de nombre (XucaMonitor_Inicio) pasa a Pulso_Inicio. La vieja
-            // se borra recien cuando la nueva quedo creada, asi nunca se pierde. Solo se reescribe si hace falta (la vieja
-            // existe o el .exe cambio de carpeta): reescribirla en cada arranque es lo que Defender marcaba (ver CarpetaTareas).
-            bool tareaVieja = TareaComando(TareaVieja) != null;
+            // "Iniciar con Windows": solo se reescribe la tarea si el .exe cambio de carpeta: reescribirla en cada arranque
+            // es lo que Defender marcaba (ver CarpetaTareas).
             string cmd = TareaComando(TareaNombre);
-            if (tareaVieja || (cmd != null && !string.Equals(cmd, TareaExe, StringComparison.OrdinalIgnoreCase)))
-            {
-                TareaCrear();
-                if (tareaVieja && TareaExiste()) TareaBorrar(TareaVieja);
-            }
+            if (cmd != null && !string.Equals(cmd, TareaExe, StringComparison.OrdinalIgnoreCase)) TareaCrear();
 
             foreach (Modulo m in modulos)
             {
@@ -570,7 +561,6 @@ namespace Xuca
         // Windows no la arranca (o la arranca sin permisos). Por eso "Iniciar con Windows" usa una tarea
         // programada con "Ejecutar con los privilegios más altos", que SI se eleva solita al iniciar sesión.
         const string TareaNombre = "Pulso_Inicio";
-        const string TareaVieja = "XucaMonitor_Inicio";   // la de hasta la 1.0.3: Iniciar la cambia por la nueva
 
         string UltimoError = "";
 
@@ -639,7 +629,7 @@ namespace Xuca
         static string Xml(string s) { return System.Security.SecurityElement.Escape(s ?? ""); }
 
         static void TareaBorrar(string nombre) { try { Com(CarpetaTareas(), "DeleteTask", nombre, 0); } catch { } }
-        void TareaBorrar() { TareaBorrar(TareaVieja); TareaBorrar(TareaNombre); }
+        void TareaBorrar() { TareaBorrar(TareaNombre); }
 
         // Instalada desde la Microsoft Store (MSIX) la carpeta del .exe cambia con cada actualizacion: la tarea apunta al
         // alias "Pulso.exe" que Windows deja fijo en %LOCALAPPDATA%\Microsoft\WindowsApps.
@@ -657,36 +647,8 @@ namespace Xuca
         // ---------- Carpeta de datos ----------
         static string carpetaDatos;   // la que eligio Iniciar (GuardarCrash la usa)
 
-        // Documentos\Pulso. Si todavia esta la de antes del cambio de nombre (Documentos\Xuca Monitor) y no hay una
-        // nueva, se renombra entera (mismo disco: no se copia nada, no se puede perder a medias). Si no se puede mudar
-        // (algun archivo abierto por otro programa), se sigue usando la vieja y se reintenta en el proximo arranque.
-        static string CarpetaDatos(bool mudar)
-        {
-            string docs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string nueva = Path.Combine(docs, Nombre), vieja = Path.Combine(docs, NombreViejo);
-            if (!Directory.Exists(nueva) && Directory.Exists(vieja))
-            {
-                if (!mudar || ViejaAbierta()) return vieja;
-                try { Directory.Move(vieja, nueva); }
-                catch { return vieja; }
-            }
-            return nueva;
-        }
-
-        // Si una Xuca Monitor (hasta la 1.0.3) sigue abierta, sigue escribiendo en la carpeta vieja: no se muda hasta
-        // que se cierre, asi los datos no quedan repartidos entre las dos carpetas.
-        static bool ViejaAbierta()
-        {
-            try
-            {
-                Mutex m;
-                if (!Mutex.TryOpenExisting("Local\\XucaMonitor", out m)) return false;
-                m.Dispose();
-                return true;
-            }
-            catch (UnauthorizedAccessException) { return true; }   // existe pero es de otro proceso con mas permisos
-            catch { return false; }
-        }
+        // Documentos\Pulso.
+        static string CarpetaDatos() { return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), Nombre); }
 
         [DllImport("shell32.dll", CharSet = CharSet.Unicode)] static extern int ExtractIconEx(string f, int i, IntPtr[] g, IntPtr[] c, int n);
 
@@ -1064,7 +1026,7 @@ namespace Xuca
         {
             string msg = ex == null ? "(error desconocido)" : ex.ToString();
             // Sin mudar la carpeta: esto puede correr antes de tomar el mutex
-            string arch = Path.Combine(carpetaDatos ?? CarpetaDatos(false), "crash.txt");
+            string arch = Path.Combine(carpetaDatos ?? CarpetaDatos(), "crash.txt");
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(arch));
